@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI 起名馆 · 三组好名，皆有出处</title>
+<style>
+  :root {
+    --paper: #f6f3ec;
+    --card: #fffdf8;
+    --ink: #1f2320;
+    --muted: #6d746e;
+    --line: #e3dccd;
+    --accent: #0d7a63;
+    --accent-soft: #e7f1ed;
+    --danger: #b8443a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  [hidden] { display: none !important; }
+
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #efeae0 0%, transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, #eaf1ee 0%, transparent 55%),
+      var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    padding: 40px 20px 64px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1120px; margin: 0 auto; }
+
+  header { margin-bottom: 28px; }
+  .brand {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 13px; letter-spacing: .18em; color: var(--accent);
+    text-transform: uppercase;
+  }
+  .brand::before { content: ""; width: 26px; height: 1px; background: var(--accent); }
+  h1 {
+    font-family: "Songti SC", "Noto Serif SC", "STSong", serif;
+    font-size: 40px; font-weight: 600; letter-spacing: .04em;
+    margin: 12px 0 10px;
+  }
+  .sub { color: var(--muted); font-size: 15px; line-height: 1.7; }
+
+  .grid {
+    display: grid; grid-template-columns: 380px minmax(0, 1fr);
+    gap: 22px; align-items: start; margin-top: 30px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(31, 35, 32, .04), 0 18px 40px -28px rgba(31, 35, 32, .35);
+  }
+
+  .panel { padding: 26px 24px 24px; }
+
+  .field { margin-bottom: 20px; }
+  .label {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; font-weight: 600; letter-spacing: .02em; margin-bottom: 9px;
+  }
+  .label span { font-weight: 400; color: var(--muted); font-size: 12px; }
+
+  input[type="text"], textarea, select {
+    width: 100%;
+    font-family: inherit; font-size: 14px; color: var(--ink);
+    background: #fffefb;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 11px 12px;
+    outline: none;
+    transition: border-color .18s, box-shadow .18s;
+  }
+  input[type="text"]:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(13, 122, 99, .12);
+  }
+  textarea { resize: vertical; min-height: 84px; line-height: 1.7; }
+  input::placeholder, textarea::placeholder { color: #a8aca5; }
+  select:disabled { color: #b3b0a5; }
+
+  .radio-row { display: flex; gap: 8px; }
+  .radio { flex: 1; position: relative; }
+  .radio input { position: absolute; opacity: 0; pointer-events: none; }
+  .radio label {
+    display: block; text-align: center; padding: 9px 0; cursor: pointer;
+    font-size: 13px; border: 1px solid var(--line); border-radius: 9px;
+    color: var(--muted); background: #fffefb; transition: all .16s;
+  }
+  .radio input:checked + label {
+    border-color: var(--accent); background: var(--accent-soft);
+    color: var(--accent); font-weight: 600;
+  }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font-size: 13px; padding: 7px 13px; border-radius: 999px;
+    border: 1px solid var(--line); background: #fffefb; color: var(--muted);
+    cursor: pointer; user-select: none; transition: all .16s;
+  }
+  .chip:hover { border-color: #c8c0ae; }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  .btn {
+    width: 100%; margin-top: 6px; padding: 13px 0;
+    font-family: inherit; font-size: 15px; font-weight: 600; letter-spacing: .06em;
+    color: #fff; background: var(--accent);
+    border: 0; border-radius: 11px; cursor: pointer;
+    transition: transform .12s, background .18s, opacity .18s;
+  }
+  .btn:hover:not(:disabled) { background: #0a6a55; }
+  .btn:active:not(:disabled) { transform: translateY(1px); }
+  .btn.stop { background: #fff; color: var(--accent); border: 1px solid var(--accent); }
+
+  .hint { margin-top: 12px; font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+  .output { min-height: 520px; display: flex; flex-direction: column; }
+  .out-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--line);
+    font-size: 13px; color: var(--muted);
+  }
+  .status { display: flex; align-items: center; gap: 8px; flex: none; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #c9c4b7; flex: none; }
+  .dot.live { background: var(--accent); animation: pulse 1.4s infinite; }
+  .dot.error { background: var(--danger); }
+  @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
+
+  .tabs { display: flex; gap: 4px; }
+  .tab {
+    font-family: inherit; font-size: 13px; color: var(--muted);
+    background: transparent; border: 0; border-radius: 8px;
+    padding: 8px 14px; cursor: pointer; transition: all .16s;
+  }
+  .tab:hover { color: var(--accent); background: #f2efe6; }
+  .tab.active { color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+
+  .out-body {
+    flex: 1; padding: 26px 28px 30px; overflow-y: auto;
+    font-family: "Songti SC", "Noto Serif SC", "STSong", serif;
+    font-size: 15px; line-height: 1.95; max-height: 640px;
+  }
+
+  .placeholder {
+    height: 100%; min-height: 420px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 14px; text-align: center; color: #a9a597;
+    font-family: inherit; font-size: 14px; line-height: 1.9;
+  }
+  .seal {
+    width: 62px; height: 62px; border: 1.5px solid #d6cdb9; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: #cbbfa6; letter-spacing: .1em;
+    font-family: "Songti SC", "STSong", serif;
+  }
+
+  .md h3 {
+    font-size: 19px; font-weight: 600; letter-spacing: .06em;
+    margin: 0 0 12px; padding-bottom: 10px; border-bottom: 1px dashed var(--line);
+  }
+  .md h3:not(:first-child) { margin-top: 30px; }
+  .md ul { list-style: none; padding: 0; }
+  .md li {
+    margin: 7px 0; color: #333934; font-size: 14.5px; line-height: 1.9;
+    display: flex; gap: 10px;
+  }
+  .md li b {
+    flex: none; min-width: 46px; color: var(--accent); font-weight: 600;
+    font-family: -apple-system, "PingFang SC", sans-serif; font-size: 13px;
+    letter-spacing: .05em;
+  }
+  .md p { margin: 8px 0; font-size: 14.5px; color: #333934; }
+  .md strong { color: var(--accent); }
+  .cursor {
+    display: inline-block; width: 2px; height: 15px; margin-left: 2px;
+    background: var(--accent); vertical-align: -2px;
+    animation: blink .9s steps(1) infinite;
+  }
+  @keyframes blink { 0%,49% { opacity: 1 } 50%,100% { opacity: 0 } }
+
+  .notice {
+    margin: 14px 24px 0; padding: 10px 14px; border-radius: 10px;
+    font-size: 12.5px; line-height: 1.7;
+  }
+  .notice.error { background: #fbf0ee; border: 1px solid #f0d6d1; color: var(--danger); }
+  .notice.warn { background: #fdf8ea; border: 1px solid #eee2c4; color: #8a6d1f; }
+
+  /* ---- 历史记录 ---- */
+  .hist { padding: 20px 22px 24px; display: flex; flex-direction: column; gap: 12px; }
+  .hist-empty {
+    padding: 60px 0; text-align: center; color: #a9a597;
+    font-family: -apple-system, "PingFang SC", sans-serif; font-size: 14px; line-height: 1.9;
+  }
+  .hist-item {
+    border: 1px solid var(--line); border-radius: 12px;
+    background: #fffefb; padding: 13px 16px;
+  }
+  .hist-top {
+    display: flex; justify-content: space-between; gap: 12px;
+    font-size: 12px; color: var(--muted);
+    font-family: -apple-system, "PingFang SC", sans-serif;
+  }
+  .hist-model { color: var(--accent); font-weight: 600; }
+  .hist-req {
+    margin: 7px 0 9px; font-size: 13px; line-height: 1.75; color: #4a504a;
+    font-family: -apple-system, "PingFang SC", sans-serif;
+  }
+  .hist-names { display: flex; flex-wrap: wrap; gap: 8px; }
+  .hist-name {
+    font-size: 15px; color: var(--accent); background: var(--accent-soft);
+    border-radius: 6px; padding: 3px 10px; letter-spacing: .04em;
+  }
+  .hist-name.empty { color: var(--muted); background: #f4f1e9; }
+
+  .out-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 13px 24px; border-top: 1px solid var(--line);
+    font-size: 12px; color: var(--muted); flex-wrap: wrap;
+  }
+  .foot-left { display: flex; gap: 14px; flex-wrap: wrap; }
+  .ghost {
+    padding: 6px 12px; font-size: 12px; font-family: inherit;
+    border: 1px solid var(--line); border-radius: 7px; background: #fffefb;
+    color: var(--muted); cursor: pointer; transition: all .16s;
+  }
+  .ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  @media (max-width: 900px) {
+    body { padding: 26px 14px 44px; }
+    .grid { grid-template-columns: 1fr; }
+    h1 { font-size: 31px; }
+    .out-body { max-height: none; }
+    .output { min-height: 380px; }
+    .out-head { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">Naming Studio</div>
+    <h1>AI 起名馆</h1>
+    <p class="sub">选择模型，说出你的期待，三组名字逐一浮现，字义、出处与气质一并写明，结果自动入库留档。</p>
+  </header>
+
+  <div class="grid">
+    <form class="card panel" id="form" autocomplete="off">
+      <div class="field">
+        <div class="label">起名模型 <span>四家任选</span></div>
+        <select id="model">
+          <option value="">加载中…</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">姓氏 <span>可留空只取名字</span></div>
+        <input type="text" id="surname" maxlength="4" placeholder="如：林" />
+      </div>
+
+      <div class="field">
+        <div class="label">性别倾向</div>
+        <div class="radio-row">
+          <div class="radio"><input type="radio" name="gender" id="g1" value="男孩" /><label for="g1">男孩</label></div>
+          <div class="radio"><input type="radio" name="gender" id="g2" value="女孩" /><label for="g2">女孩</label></div>
+          <div class="radio"><input type="radio" name="gender" id="g3" value="中性" checked /><label for="g3">中性</label></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="label">风格偏好 <span>可多选</span></div>
+        <div class="chips" id="chips">
+          <div class="chip" data-v="文雅">文雅</div>
+          <div class="chip" data-v="大气">大气</div>
+          <div class="chip" data-v="清新">清新</div>
+          <div class="chip" data-v="古风">古风</div>
+          <div class="chip" data-v="现代">现代</div>
+          <div class="chip" data-v="独特">独特</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="label">字数</div>
+        <select id="length">
+          <option value="两个字（不含姓）">两个字（不含姓）</option>
+          <option value="一个字（不含姓）">一个字（不含姓）</option>
+          <option value="不限">不限</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">期望寓意 <span>越具体越好</span></div>
+        <textarea id="meaning" maxlength="300" placeholder="如：希望孩子心胸开阔、遇事从容，最好出自山水相关的诗文。"></textarea>
+      </div>
+
+      <div class="field">
+        <div class="label">其他要求 <span>选填</span></div>
+        <input type="text" id="extra" maxlength="200" placeholder="如：避开用过的字、不要多音字" />
+      </div>
+
+      <button class="btn" id="submit" type="submit">生成三组名字</button>
+      <p class="hint">生成内容由 AI 实时输出，请自行核对字义与实际含义。</p>
+    </form>
+
+    <section class="card output">
+      <div class="out-head">
+        <div class="tabs">
+          <button class="tab active" data-tab="result" type="button">生成结果</button>
+          <button class="tab" data-tab="history" type="button">历史记录</button>
+        </div>
+        <div class="status">
+          <span class="dot" id="dot"></span>
+          <span id="statusText">等待输入</span>
+        </div>
+      </div>
+
+      <div id="notices"></div>
+
+      <div class="out-body" id="outBody">
+        <div id="resultView">
+          <div class="placeholder" id="placeholder">
+            <div class="seal">名</div>
+            <p>填写左侧需求，点击生成<br />名字会逐个字浮现，无需等待全部写完</p>
+          </div>
+          <div class="md" id="md" hidden></div>
+        </div>
+        <div id="historyView" class="hist" hidden>
+          <div class="hist-empty" id="histEmpty">正在读取历史记录…</div>
+        </div>
+      </div>
+
+      <div class="out-foot">
+        <div class="foot-left"><span id="metaInfo">—</span></div>
+        <div style="display: flex; gap: 8px;">
+          <button class="ghost" id="refreshBtn" type="button" hidden>刷新记录</button>
+          <button class="ghost" id="copyBtn" type="button" hidden>复制全文</button>
+          <button class="ghost" id="clearBtn" type="button">清空</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+
+  var form = $('form');
+  var submitBtn = $('submit');
+  var modelSelect = $('model');
+  var outBody = $('outBody');
+  var resultView = $('resultView');
+  var historyView = $('historyView');
+  var histEmpty = $('histEmpty');
+  var md = $('md');
+  var placeholder = $('placeholder');
+  var statusText = $('statusText');
+  var dot = $('dot');
+  var metaInfo = $('metaInfo');
+  var notices = $('notices');
+  var copyBtn = $('copyBtn');
+  var clearBtn = $('clearBtn');
+  var refreshBtn = $('refreshBtn');
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  var chips = Array.prototype.slice.call(document.querySelectorAll('.chip'));
+
+  var raw = '';
+  var abortCtrl = null;
+  var running = false;
+  var rafPending = false;
+  var activeTab = 'result';
+  var historyLoaded = false;
+  var currentTab = 'result';
+
+  chips.forEach(function (chip) {
+    chip.addEventListener('click', function () { chip.classList.toggle('on'); });
+  });
+
+  /* ---------------- 基础状态 ---------------- */
+
+  function setStatus(kind, text) {
+    dot.className = 'dot' + (kind ? ' ' + kind : '');
+    statusText.textContent = text;
+  }
+
+  function clearNotices() { notices.innerHTML = ''; }
+
+  function addNotice(kind, message) {
+    var el = document.createElement('div');
+    el.className = 'notice ' + kind;
+    el.textContent = message;
+    notices.appendChild(el);
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function inline(str) {
+    return escapeHtml(str).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  }
+
+  function renderMarkdown(text) {
+    var lines = text.split('\n');
+    var html = '';
+    var inList = false;
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim();
+
+      if (/^#{2,4}\s/.test(line)) {
+        if (inList) { html += '</ul>'; inList = false; }
+        html += '<h3>' + inline(line.replace(/^#{2,4}\s/, '')) + '</h3>';
+        continue;
+      }
+
+      if (/^[-*•]\s?/.test(line) && line.length > 1) {
+        if (!inList) { html += '<ul>'; inList = true; }
+        var item = line.replace(/^[-*•]\s?/, '');
+        var m = item.match(/^([^：:]{1,6})[：:]\s*(.*)$/);
+        if (m) {
+          html += '<li><b>' + escapeHtml(m[1]) + '</b><span>' + inline(m[2]) + '</span></li>';
+        } else {
+          html += '<li><span>' + inline(item) + '</span></li>';
+        }
+        continue;
+      }
+
+      if (inList) { html += '</ul>'; inList = false; }
+      if (line) html += '<p>' + inline(line) + '</p>';
+    }
+    if (inList) html += '</ul>';
+    return html;
+  }
+
+  function paint(final) {
+    if (rafPending) return;
+    rafPending = true;
+    requestAnimationFrame(function () {
+      rafPending = false;
+      if (!raw) {
+        md.innerHTML = '';
+        return;
+      }
+      md.innerHTML = renderMarkdown(raw) + (final ? '' : '<span class="cursor"></span>');
+      if (currentTab === 'result') outBody.scrollTop = outBody.scrollHeight;
+    });
+  }
+
+  /* ---------------- 模型列表 ---------------- */
+
+  function renderModels(data) {
+    modelSelect.innerHTML = '';
+    var models = (data && data.models) || [];
+    if (!models.length) {
+      modelSelect.innerHTML = '<option value="">未配置模型</option>';
+      return;
+    }
+
+    models.forEach(function (m) {
+      var opt = document.createElement('option');
+      opt.value = m.key;
+      opt.textContent = m.available ? m.label + ' · ' + m.model : m.label + '（未配置密钥）';
+      if (!m.available) opt.disabled = true;
+      modelSelect.appendChild(opt);
+    });
+
+    if (data.defaultModel) modelSelect.value = data.defaultModel;
+    else if (models[0] && models[0].available) modelSelect.value = models[0].key;
+
+    if (!models.some(function (m) { return m.available; })) {
+      addNotice('warn', '四家模型都还没有配置密钥，请先在环境变量里填入对应的 API Key。');
+    }
+  }
+
+  function loadModels() {
+    fetch('/api/name')
+      .then(function (r) { return r.json(); })
+      .then(renderModels)
+      .catch(function () {
+        modelSelect.innerHTML = '<option value="">模型列表读取失败</option>';
+      });
+  }
+
+  /* ---------------- 历史记录 ---------------- */
+
+  function formatTime(value) {
+    if (!value) return '';
+    var d = new Date(value);
+    if (isNaN(d.getTime())) return String(value);
+    var pad = function (n) { return n < 10 ? '0' + n : String(n); };
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
+      ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
+  function renderHistory(data) {
+    var records = (data && data.records) || [];
+    historyView.querySelectorAll('.hist-item, .hist-error').forEach(function (el) { el.remove(); });
+
+    if (data && data.error) {
+      histEmpty.hidden = true;
+      var err = document.createElement('div');
+      err.className = 'hist-error notice error';
+      err.style.margin = '0';
+      err.textContent = '历史记录读取失败：' + data.error;
+      historyView.appendChild(err);
+      return;
+    }
+
+    if (!records.length) {
+      histEmpty.hidden = false;
+      histEmpty.textContent = '还没有记录。生成一次名字后，这里会列出历史方案。';
+      return;
+    }
+
+    histEmpty.hidden = true;
+
+    records.forEach(function (rec) {
+      var item = document.createElement('div');
+      item.className = 'hist-item';
+
+      var names = Array.isArray(rec.names) ? rec.names : [];
+      var nameHtml = names.length
+        ? names.map(function (p) { return '<span class="hist-name">' + escapeHtml(p.name || '') + '</span>'; }).join('')
+        : '<span class="hist-name empty">未解析到方案</span>';
+
+      item.innerHTML =
+        '<div class="hist-top">' +
+          '<span class="hist-model">' + escapeHtml(rec.model || '未知模型') + '</span>' +
+          '<span>' + escapeHtml(formatTime(rec.created_at)) + '</span>' +
+        '</div>' +
+        '<div class="hist-req">' + escapeHtml(rec.requirement || '') + '</div>' +
+        '<div class="hist-names">' + nameHtml + '</div>';
+
+      historyView.appendChild(item);
+    });
+  }
+
+  function loadHistory() {
+    histEmpty.hidden = false;
+    histEmpty.textContent = '正在读取历史记录…';
+    historyLoaded = true;
+
+    fetch('/api/name?history=1&limit=10')
+      .then(function (r) { return r.json(); })
+      .then(renderHistory)
+      .catch(function (err) {
+        histEmpty.hidden = true;
+        renderHistory({ records: [], error: err.message });
+      });
+  }
+
+  function switchTab(name) {
+    currentTab = name;
+    tabs.forEach(function (t) {
+      t.classList.toggle('active', t.dataset.tab === name);
+    });
+
+    if (name === 'history') {
+      resultView.hidden = true;
+      historyView.hidden = false;
+      refreshBtn.hidden = false;
+      copyBtn.hidden = true;
+      if (!historyLoaded) loadHistory();
+    } else {
+      historyView.hidden = true;
+      resultView.hidden = false;
+      refreshBtn.hidden = true;
+      copyBtn.hidden = !raw;
+    }
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () { switchTab(tab.dataset.tab); });
+  });
+
+  /* ---------------- 流式生成 ---------------- */
+
+  function handleEvent(block) {
+    var eventName = 'message';
+    var dataLines = [];
+    block.split('\n').forEach(function (line) {
+      if (line.indexOf(':') === 0) return;
+      if (line.indexOf('event:') === 0) eventName = line.slice(6).trim();
+      else if (line.indexOf('data:') === 0) dataLines.push(line.slice(5).trim());
+    });
+    if (!dataLines.length) return;
+
+    var data;
+    try { data = JSON.parse(dataLines.join('\n')); } catch (e) { return; }
+
+    if (eventName === 'meta') {
+      var label = [data.providerLabel, data.model].filter(Boolean).join(' · ');
+      metaInfo.textContent = label || data.model || '—';
+      if (data.recordId) metaInfo.textContent += ' · 记录 #' + String(data.recordId).slice(0, 8);
+    } else if (eventName === 'delta') {
+      raw += data.text || '';
+      paint(false);
+    } else if (eventName === 'warning') {
+      addNotice('warn', data.message || '提示');
+    } else if (eventName === 'error') {
+      addNotice('error', data.message || '生成失败');
+      setStatus('error', '生成失败');
+    } else if (eventName === 'done') {
+      paint(true);
+      var seconds = data.latency ? (data.latency / 1000).toFixed(1) + ' 秒' : '';
+      var saved = data.recordId ? '已入库 · #' + String(data.recordId).slice(0, 8) : '未入库';
+      metaInfo.textContent = [data.providerLabel, data.model, seconds, saved].filter(Boolean).join(' · ');
+      setStatus('', '已完成');
+      if (raw) copyBtn.hidden = false;
+      historyLoaded = false;
+    }
+  }
+
+  async function readStream(response) {
+    var reader = response.body.getReader();
+    var decoder = new TextDecoder();
+    var buffer = '';
+
+    while (true) {
+      var step = await reader.read();
+      if (step.done) break;
+      buffer += decoder.decode(step.value, { stream: true });
+      var blocks = buffer.split('\n\n');
+      buffer = blocks.pop() || '';
+      blocks.forEach(handleEvent);
+    }
+    buffer += decoder.decode();
+    if (buffer.trim()) handleEvent(buffer);
+  }
+
+  function resetView() {
+    raw = '';
+    md.innerHTML = '';
+    md.hidden = true;
+    placeholder.style.display = 'flex';
+    clearNotices();
+    copyBtn.hidden = true;
+    metaInfo.textContent = '—';
+  }
+
+  async function start() {
+    var modelKey = modelSelect.value;
+    if (!modelKey) {
+      addNotice('error', '请先选择一个已配置密钥的模型');
+      return;
+    }
+
+    running = true;
+    submitBtn.textContent = '停止生成';
+    submitBtn.classList.add('stop');
+
+    raw = '';
+    md.hidden = false;
+    placeholder.style.display = 'none';
+    clearNotices();
+    copyBtn.hidden = true;
+    metaInfo.textContent = '正在流式生成…';
+    setStatus('live', '正在生成');
+    switchTab('result');
+
+    var payload = {
+      model: modelKey,
+      surname: $('surname').value.trim(),
+      gender: (document.querySelector('input[name="gender"]:checked') || {}).value || '',
+      styles: chips.filter(function (c) { return c.classList.contains('on'); })
+        .map(function (c) { return c.dataset.v; }),
+      length: $('length').value,
+      meaning: $('meaning').value.trim(),
+      extra: $('extra').value.trim()
+    };
+
+    abortCtrl = new AbortController();
+
+    try {
+      var response = await fetch('/api/name', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: abortCtrl.signal
+      });
+
+      if (!response.ok) {
+        var errBody = {};
+        try { errBody = await response.json(); } catch (e) {}
+        throw new Error(errBody.error || '请求失败（HTTP ' + response.status + '）');
+      }
+      if (!response.body) throw new Error('当前环境不支持流式响应');
+
+      await readStream(response);
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        setStatus('', '已停止');
+        paint(true);
+      } else {
+        addNotice('error', err.message || '生成失败，请稍后重试');
+        setStatus('error', '生成失败');
+      }
+    } finally {
+      running = false;
+      abortCtrl = null;
+      submitBtn.textContent = '生成三组名字';
+      submitBtn.classList.remove('stop');
+      if (raw) copyBtn.hidden = currentTab !== 'result';
+    }
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (running) {
+      if (abortCtrl) abortCtrl.abort();
+      return;
+    }
+    start();
+  });
+
+  copyBtn.addEventListener('click', async function () {
+    try {
+      await navigator.clipboard.writeText(raw);
+      copyBtn.textContent = '已复制';
+      setTimeout(function () { copyBtn.textContent = '复制全文'; }, 1400);
+    } catch (e) {
+      addNotice('warn', '复制失败，请手动选择文本');
+    }
+  });
+
+  refreshBtn.addEventListener('click', function () { loadHistory(); });
+
+  clearBtn.addEventListener('click', function () {
+    if (running && abortCtrl) abortCtrl.abort();
+    resetView();
+    setStatus('', '等待输入');
+    switchTab('result');
+  });
+
+  loadModels();
+  switchTab('result');
+})();
+</script>
+</body>
+</html>
